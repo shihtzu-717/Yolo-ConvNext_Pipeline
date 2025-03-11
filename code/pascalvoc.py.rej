@@ -1,0 +1,32 @@
+diff a/pascalvoc.py b/pascalvoc.py	(rejected hunks)
+@@ -159,6 +159,8 @@ def getBoundingBoxes(directory,
+                 idClass = (splitLine[0])  # class
+                 x = float(splitLine[1])
+                 y = float(splitLine[2])
++                # x = float(splitLine[1]) - float(splitLine[3])/float(2.0)
++                # y = float(splitLine[2]) - float(splitLine[4])/float(2.0)
+                 w = float(splitLine[3])
+                 h = float(splitLine[4])
+                 bb = BoundingBox(nameOfImage,
+@@ -174,9 +176,11 @@ def getBoundingBoxes(directory,
+             else:
+                 # idClass = int(splitLine[0]) #class
+                 idClass = (splitLine[0])  # class
+-                confidence = float(splitLine[1])
++                confidence = float(splitLine[1]) # confidence
+                 x = float(splitLine[2])
+                 y = float(splitLine[3])
++                # x = 0 if (float(splitLine[2]) - float(splitLine[4])/float(2.0) < 0)  else float(splitLine[2]) - float(splitLine[4])/float(2.0)
++                # y = 0 if (float(splitLine[3]) - float(splitLine[5])/float(2.0) < 0)   else float(splitLine[3]) - float(splitLine[5])/float(2.0)
+                 w = float(splitLine[4])
+                 h = float(splitLine[5])
+                 bb = BoundingBox(nameOfImage,
+@@ -378,7 +382,7 @@ detections = evaluator.PlotPrecisionRecallCurve(
+     IOUThreshold=iouThreshold,  # IOU threshold
+     method=MethodAveragePrecision.EveryPointInterpolation,
+     showAP=True,  # Show Average Precision in the title of the plot
+-    showInterpolatedPrecision=False,  # Don't plot the interpolated precision curve
++    showInterpolatedPrecision=True,  # Don't plot the interpolated precision curve
+     savePath=savePath,
+     showGraphic=showPlot)
+ 

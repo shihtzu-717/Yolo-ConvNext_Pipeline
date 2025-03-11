@@ -1,0 +1,16 @@
+{
+  "host":"192.168.0.61",
+  "port": 6006,
+  "timeout":10,
+  "username":"daree",
+  "password":"riaas",
+
+  "model_type": "pothole",
+  "model_name":"pad_PIXEL_padsize_100.0_box_False_shift_True_nbclss_9_case05",
+
+  "save_results": 1,
+
+  "input_path" : "C:\\Users\\nayou\\Desktop\\Yolo_ConvNext_Pipeline\\data\\tmp",
+  "output_dir" : "C:\\Users\\nayou\\Desktop\\Yolo_ConvNext_Pipeline\\results\\tmp",
+
+}

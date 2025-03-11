@@ -1,0 +1,136 @@
+diff a/lib/Evaluator.py b/lib/Evaluator.py	(rejected hunks)
+@@ -63,14 +63,16 @@ class Evaluator:
+                 groundTruths.append([
+                     bb.getImageName(),
+                     bb.getClassId(), 1,
+-                    bb.getAbsoluteBoundingBox(BBFormat.XYX2Y2)
++                    # bb.getAbsoluteBoundingBox(BBFormat.XYX2Y2)
++                    bb.getAbsoluteBoundingBox(BBFormat.XYWH)
+                 ])
+             else:
+                 detections.append([
+                     bb.getImageName(),
+                     bb.getClassId(),
+                     bb.getConfidence(),
+-                    bb.getAbsoluteBoundingBox(BBFormat.XYX2Y2)
++                    # bb.getAbsoluteBoundingBox(BBFormat.XYX2Y2)
++                    bb.getAbsoluteBoundingBox(BBFormat.XYWH)
+                 ])
+             # get class
+             if bb.getClassId() not in classes:
+@@ -106,22 +108,28 @@ class Evaluator:
+                 iouMax = sys.float_info.min
+                 for j in range(len(gt)):
+                     # print('Ground truth gt => %s' % (gt[j][3],))
+-                    iou = Evaluator.iou(dects[d][3], gt[j][3])
++                    # iou = Evaluator.iou(dects[d][3], gt[j][3])
++                    iou = Evaluator.iou_yolo(dects[d][3], gt[j][3])
+                     if iou > iouMax:
+                         iouMax = iou
+                         jmax = j
++                        print ("{}.jpg: {}, {:2.4f}, {:2.4f}, {:2.4f}, {:2.4f}, {:2.4f}, {:3.4f} Truth".format(dects[d][0], dects[d][1], dects[d][2], gt[j][3][0], gt[j][3][1], gt[j][3][2], gt[j][3][3], iouMax))
+                 # Assign detection as true positive/don't care/false positive
+                 if iouMax >= IOUThreshold:
+                     if det[dects[d][0]][jmax] == 0:
+                         TP[d] = 1  # count as true positive
+                         det[dects[d][0]][jmax] = 1  # flag as already 'seen'
++                        print ("{}.jpg: {}, {:2.4f}, {:2.4f}, {:2.4f}, {:2.4f}, {:2.4f}, {:3.4f} TP".format(dects[d][0], dects[d][1], dects[d][2], dects[d][3][0], dects[d][3][1], dects[d][3][2], dects[d][3][3], iouMax))
+                         # print("TP")
+                     else:
+                         FP[d] = 1  # count as false positive
++                        print ("{}.jpg: {}, {:2.4f}, {:2.4f}, {:2.4f}, {:2.4f}, {:2.4f}, {:3.4f} FP".format(dects[d][0], dects[d][1], dects[d][2], dects[d][3][0], dects[d][3][1], dects[d][3][2], dects[d][3][3], iouMax))
++                        # print(f'')
+                         # print("FP")
+                 # - A detected "cat" is overlaped with a GT "cat" with IOU >= IOUThreshold.
+                 else:
+                     FP[d] = 1  # count as false positive
++                    print ("{}.jpg: {}, {:2.4f}, {:2.4f}, {:2.4f}, {:2.4f}, {:2.4f}, {:3.4f} FP".format(dects[d][0], dects[d][1], dects[d][2], dects[d][3][0], dects[d][3][1], dects[d][3][2], dects[d][3][3], iouMax))
+                     # print("FP")
+             # compute precision, recall and average precision
+             acc_FP = np.cumsum(FP)
+@@ -145,6 +153,8 @@ class Evaluator:
+                 'total TP': np.sum(TP),
+                 'total FP': np.sum(FP)
+             }
++            # print (f'Class={c}, Total Positive={npos} TP={np.sum(TP)}, FP={np.sum(FP)}, Precision={mpre}, Reacll={mrec}')
++            print (f'Class={c}, Total Positive={npos} TP={np.sum(TP)}, FP={np.sum(FP)}')
+             ret.append(r)
+         return ret
+ 
+@@ -393,6 +403,18 @@ class Evaluator:
+         assert iou >= 0
+         return iou
+ 
++    @staticmethod
++    def iou_yolo(boxA, boxB):
++        if Evaluator._boxesIntersect_yolo(boxA, boxB) is False:
++            return 0
++        interArea = Evaluator._getIntersectionArea_yolo(boxA, boxB)
++        union = Evaluator._getUnionAreas_yolo(boxA, boxB, interArea=interArea)
++        # intersection over union
++        iou = interArea / union
++        assert iou >= 0
++        return iou
++
++
+     # boxA = (Ax1,Ay1,Ax2,Ay2)
+     # boxB = (Bx1,By1,Bx2,By2)
+     @staticmethod
+@@ -407,6 +429,19 @@ class Evaluator:
+             return False  # boxA is below boxB
+         return True
+ 
++    @staticmethod
++    def _boxesIntersect_yolo(boxA, boxB):
++        if boxA[0]-(boxA[2]/2) > boxB[0]+(boxB[2]/2):
++            return False  # boxA is right of boxB
++        if boxA[0]+(boxA[2]/2) < boxB[0]-(boxB[2]/2):
++            return False  # boxA is left of boxB
++        if boxA[1]+(boxA[3]/2) < boxB[1]-(boxB[3]/2):
++            return False  # boxA is above boxB
++        if boxA[1]-(boxA[3]/2) > boxB[1]+(boxB[3]/2):
++            return False  # boxA is below boxB
++        return True
++
++
+     @staticmethod
+     def _getIntersectionArea(boxA, boxB):
+         xA = max(boxA[0], boxB[0])
+@@ -415,6 +450,16 @@ class Evaluator:
+         yB = min(boxA[3], boxB[3])
+         # intersection area
+         return (xB - xA + 1) * (yB - yA + 1)
++    
++    @staticmethod
++    def _getIntersectionArea_yolo(boxA, boxB):
++        xA = max(boxA[0]-(boxA[2]/2), boxB[0]-(boxB[2]/2)) #left
++        yA = max(boxA[1]-(boxA[3]/2), boxB[1]-(boxB[3]/2)) # top
++        xB = min(boxA[0]+(boxA[2]/2), boxB[0]+(boxB[2]/2)) # right
++        yB = min(boxA[1]+(boxA[3]/2), boxB[1]+(boxB[3]/2)) # bottom
++        # intersection area
++        return (xB - xA ) * (yB - yA)
++    
+ 
+     @staticmethod
+     def _getUnionAreas(boxA, boxB, interArea=None):
+@@ -423,7 +468,20 @@ class Evaluator:
+         if interArea is None:
+             interArea = Evaluator._getIntersectionArea(boxA, boxB)
+         return float(area_A + area_B - interArea)
++    
++    @staticmethod
++    def _getUnionAreas_yolo(boxA, boxB, interArea=None):
++        area_A = Evaluator._getArea_yolo(boxA)
++        area_B = Evaluator._getArea_yolo(boxB)
++        if interArea is None:
++            interArea = Evaluator._getIntersectionArea_yolo(boxA, boxB)
++        return float(area_A + area_B - interArea)    
+ 
+     @staticmethod
+     def _getArea(box):
+         return (box[2] - box[0] + 1) * (box[3] - box[1] + 1)
++
++
++    @staticmethod
++    def _getArea_yolo(box):
++        return box[2]* box[3]
