@@ -2,7 +2,7 @@ import os
 import json
 import detection
 import classification
-import pascalvoc_updated
+import mAP
 
 # 설정 파일 경로
 CONFIG_PATH = "conf.json"
@@ -53,7 +53,8 @@ def run_evaluation(config, step):
     gt_data_path = os.path.join(config["input_path"], "annotations")
     det_data_path = os.path.join(config["output_dir"], step, "annotations")
     results_data_path = os.path.join(config["output_dir"], "evaluate")
-    results = pascalvoc_updated.process_evaluation(gt_data_path, det_data_path, 10, iouThreshold=0.5, savePath=results_data_path, showPlot=True)
+    class_num = 10
+    results = mAP.process_evaluation(gt_data_path, det_data_path, class_num, threshold=float(config['thresh']), iouThreshold=float(config['iou_thresh']), savePath=results_data_path, showPlot=False)
     print("✅ 성능 평가 완료!")
 
 

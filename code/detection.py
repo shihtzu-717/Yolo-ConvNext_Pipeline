@@ -99,11 +99,11 @@ def yolo_inference(info, model_type):
 
             if model_framework == 'darknet':
                 ssh_manager.send_command_long_time(
-                        'cd /home/daree/dev/darknet ; /home/daree/dev/darknet/AI_application.sh ' + model_name + ' ' + remote_input_dir_images + ' ' + iou_thresh + ' ' + thresh + ' -save_labels')
+                        'cd /home/daree/dev/darknet ; /home/daree/dev/darknet/AI_application.sh ' + model_name + ' ' + remote_input_dir_images + ' ' + iou_thresh + ' ' + '0.005' + ' -save_labels')
 
             elif model_framework == 'darknet255':
                 ssh_manager.send_command_long_time(
-                        'cd /home/daree/dev/darknet ; /home/daree/dev/darknet/AI_application_255.sh ' + model_name + ' ' + remote_input_dir_images + ' ' + iou_thresh + ' ' + thresh + ' -save_labels')
+                        'cd /home/daree/dev/darknet ; /home/daree/dev/darknet/AI_application_255.sh ' + model_name + ' ' + remote_input_dir_images + ' ' + iou_thresh + ' ' + '0.005' + ' -save_labels')
 
             print("---------->   Model inference end")
             output_images_path = os.path.join('output', model_name, output_dir, model_type, 'images')
@@ -146,11 +146,11 @@ def yolo_inference(info, model_type):
 
         if model_framework == 'darknet':
             ssh_manager.send_command_long_time(
-                    'cd /home/daree/dev/darknet ; /home/daree/dev/darknet/AI_pipeline.sh ' + model_name + ' ' + remote_input_dir_images + ' ' + iou_thresh + ' ' + thresh + ' -save_labels')
+                    'cd /home/daree/dev/darknet ; /home/daree/dev/darknet/AI_pipeline.sh ' + model_name + ' ' + remote_input_dir_images + ' ' + iou_thresh + ' ' + '0.005' + ' -save_labels')
 
         elif model_framework == 'darknet255':
             ssh_manager.send_command_long_time(
-                    'cd /home/daree/dev/darknet ; /home/daree/dev/darknet/AI_application_255.sh ' + model_name + ' ' + remote_input_dir_images + ' ' + iou_thresh + ' ' + thresh + ' -save_labels')
+                    'cd /home/daree/dev/darknet ; /home/daree/dev/darknet/AI_application_255.sh ' + model_name + ' ' + remote_input_dir_images + ' ' + iou_thresh + ' ' + '0.005' + ' -save_labels')
 
         print("---------->   Model inference end")
 

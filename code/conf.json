@@ -19,7 +19,7 @@
   "__detection_model_name__": "231124_multiobject_fast_gpu_608, 230726_multiobject_tiny",
 
   "iou_thresh": "0.5",
-  "thresh": "0.005",
+  "thresh": "0.25",
 
   "classification_model_type": "pothole",
   "__classification_model_type__": "pothole, debris",

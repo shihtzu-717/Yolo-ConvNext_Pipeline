@@ -71,7 +71,7 @@ def getBoundingBoxes(directory, isGT, bbFormat, coordType, allBoundingBoxes=None
     return allBoundingBoxes, allClasses
 
 # Main processing function
-def process_evaluation(gtFolder, detFolder, class_num, iouThreshold=0.5, savePath="results", showPlot=True):
+def process_evaluation(gtFolder, detFolder, class_num, threshold=0.25, iouThreshold=0.5, savePath="results", showPlot=True):
     try:
         os.makedirs(savePath, exist_ok=True)
         print(f"Directory '{savePath}' created successfully or already exists.")
@@ -83,13 +83,10 @@ def process_evaluation(gtFolder, detFolder, class_num, iouThreshold=0.5, savePat
     allBoundingBoxes, allClasses = getBoundingBoxes(detFolder, False, BBFormat.XYWH, CoordinatesType.Absolute, allBoundingBoxes, allClasses)
     
     evaluator = Evaluator()
-    # detections = evaluator.PlotPrecisionRecallCurve(allBoundingBoxes, IOUThreshold=iouThreshold, 
-    #                                                 method=MethodAveragePrecision.EveryPointInterpolation, showAP=True, showInterpolatedPrecision=True, savePath=savePath, showGraphic=showPlot)
-    detections = evaluator.PlotPrecisionRecallCurve(allBoundingBoxes, IOUThreshold=iouThreshold, 
+    detections = evaluator.PlotPrecisionRecallCurve(allBoundingBoxes, conf_threshold=threshold, IOUThreshold=iouThreshold,
                                                     method=MethodAveragePrecision.EveryPointInterpolation, showAP=True, showInterpolatedPrecision=True, savePath=savePath, showGraphic=False)
     
     ap_values = [m['AP'] for m in detections]
-    print(ap_values, len(detections))
     
     # Filter out nan values
     ap_values = [ap for ap in ap_values if not math.isnan(ap)]
@@ -102,10 +99,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Evaluate object detection using Pascal VOC metrics")
     parser.add_argument("-gt", "--gtfolder", default="groundtruths", help="Folder containing ground truth bounding boxes")
     parser.add_argument("-det", "--detfolder", default="detections", help="Folder containing detected bounding boxes")
-    parser.add_argument("-t", "--threshold", type=float, default=0.45, help="IOU threshold (default: 0.5)")
+    parser.add_argument("-t", "--threshold", type=float, default=0.25, help="Confidence threshold (default: 0.25)")
+    parser.add_argument("-iou", "--iou_threshold", type=float, default=0.5, help="IOU threshold (default: 0.5)")
     parser.add_argument("-sp", "--savepath", required=True, help="Folder to save results")
     parser.add_argument("-np", "--noplot", action="store_false", help="Disable plotting")
     parser.add_argument("-cl", "--class_num", type=int, default=10, help="Disable plotting")
 
     args = parser.parse_args()
-    process_evaluation(args.gtfolder, args.detfolder, args.class_num, args.threshold, args.savepath, args.noplot)
+    process_evaluation(args.gtfolder, args.detfolder, args.class_num, args.threshold, args.iou_threshold, args.savepath, args.noplot)
