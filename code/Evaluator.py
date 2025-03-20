@@ -47,7 +47,6 @@ class Evaluator:
                 ])
             if bb.getClassId() not in classes:
                 classes.append(bb.getClassId())
-
         classes = sorted(classes)
 
         # 출력용 헤더
@@ -174,7 +173,7 @@ class Evaluator:
                 "total positives": npos,
                 "total TP": TP_sum,             # (B) 단일 threshold=0.25일 때 TP
                 "total FP": FP_sum,             # (B) 단일 threshold=0.25일 때 FP
-                "total FN": FN_sum              # (B) 단일 threshold=0.25일 때 FN
+                "total FN": FN_sum,             # (B) 단일 threshold=0.25일 때 FN
             }
             ret.append(r)
 

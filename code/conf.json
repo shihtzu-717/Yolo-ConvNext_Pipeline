@@ -1,21 +1,22 @@
 {
   "timeout": 10,
-  "model_pipeline": ["edge"],
-  "__model_pipeline__": ["edge", "server", "classification"],
+  "model_pipeline": ["server", "classification"],
+  "__model_pipeline__": ["edge", "server", "classification", "ensemble"],
 
   "detection_host":"192.168.0.75",
   "detection_username":"daree",
   "detection_password":"Riaas8!@",
 
   "classification_host":"192.168.0.61",
-  "classification_port":22,
   "classification_username":"daree",
   "classification_password":"riaas",
 
-  "detection_model_framework": "darknet",
+  "edge_model_framework": "darknet",
+  "server_model_framework": "darknet",
   "__detection_model_framework__": "darknet, darknet255, yolov7",
 
-  "detection_model_name":"230726_multiobject_tiny",
+  "edge_model_name":"230726_multiobject_tiny",
+  "server_model_name":"230726_multiobject_tiny",
   "__detection_model_name__": "231124_multiobject_fast_gpu_608, 230726_multiobject_tiny",
 
   "iou_thresh": "0.5",
@@ -23,11 +24,10 @@
 
   "classification_model_type": "pothole",
   "__classification_model_type__": "pothole, debris",
+  "classification_model_name":"250227_testcase_05",
 
-  "classification_model_name":"pad_PIXEL_padsize_100.0_box_False_shift_True_nbclss_9_case05",
-
-  "input_path" : "C:\\Users\\nayou\\Desktop\\Yolo_ConvNext_Pipeline\\data\\tmp",
-  "output_dir" : "C:\\Users\\nayou\\Desktop\\Yolo_ConvNext_Pipeline\\results\\tmp",
+  "input_path" : "C:\\Users\\nayou\\Desktop\\Yolo_ConvNext_Pipeline\\data\\japan",
+  "output_dir" : "C:\\Users\\nayou\\Desktop\\Yolo_ConvNext_Pipeline\\results\\japan",
 
   "evaluation_per_step": false
 }

@@ -10,29 +10,30 @@ from sshmanager import SSHManager
 AI_APPLICATION_VERION = "INFERENCE DETECTION MODEL"
 line_clean_count = 140
 batch_size = 2000
-def yolo_inference(info, model_type):
+
+def yolo_inference(info, model_type, filelist=None):
     host = info["detection_host"]
     timeout = info["timeout"]
     username = info["detection_username"]
     password = info["detection_password"]
-    model_framework = info['detection_model_framework']
-    model_name = info["detection_model_name"]
+    model_framework = info[f'{model_type}_model_framework']
+    model_name = info[f"{model_type}_model_name"]
     iou_thresh = info["iou_thresh"]
     thresh = info["thresh"]
     input_path = info["input_path"]
     output_dir = info["output_dir"]
 
     print("\n\n==================================================================================================================")
-    print(f"                                         * {AI_APPLICATION_VERION} *\n")
-    print("- Configuration Information\n")
-    print(f"- Version : {AI_APPLICATION_VERION}\n")
-    print(f"- Model Framework: {model_framework}\n")
-    print(f"- threshold: {thresh}\n")
-    print(f"- IoU-threshold: {iou_thresh}\n")
-    print(f"- Model Name : {model_name}\n")
-    print(f"- Input Directory : {input_path}\n")
-    print(f"- Output Directory : {output_dir}_{model_name}\n")
-    print(f"- Host IP : {host}\n")
+    print(f"                                         * {AI_APPLICATION_VERION} - {(model_type).upper()} *")
+    print("- Configuration Information")
+    print(f"- Version : {AI_APPLICATION_VERION}")
+    print(f"- Model Framework: {model_framework}")
+    print(f"- threshold: {thresh}")
+    print(f"- IoU-threshold: {iou_thresh}")
+    print(f"- Model Name : {model_name}")
+    print(f"- Input Directory : {input_path}")
+    print(f"- Output Directory : {output_dir}_{model_name}")
+    print(f"- Host IP : {host}")
     print("==================================================================================================================\n")
 
     ssh = paramiko.SSHClient()
@@ -51,18 +52,17 @@ def yolo_inference(info, model_type):
         print('서버 저장된 모델 :', server_model_list)
         sys.exit()
 
-
     ssh_manager = SSHManager()
     print( f"---------->   Create ssh client : {host}" )
     ssh_manager.create_ssh_client(host, username, password, timeout) # 세션생성
 
-    current_path = os.path.abspath(os.getcwd())
-    base_path = os.path.join(current_path, input_path)
-    print(f'base_path = {base_path}')
-    filelist = glob.glob(base_path+'\\**\\*.jpg', recursive=True) + glob.glob(base_path+'\\**\\*.png', recursive=True)
+    if filelist == None:
+        print(f'input_path = {input_path}')
+        filelist = glob.glob(input_path+'\\**\\*.jpg', recursive=True) + glob.glob(input_path+'\\**\\*.png', recursive=True)
+    else:
+        print(f'input_path = {os.path.dirname(filelist[0])}')
 
     remote_input_dir_num = int(random.random() * 10000000000)
-
     remote_input_dir = "/tmp/"+model_framework+"/input" + "_" + str(remote_input_dir_num) + '/'
     remote_input_dir_images = "/tmp/" + model_framework + "/input" + "_" + str(remote_input_dir_num) + '/images/'
     remote_input_dir_annotations = "/tmp/" + model_framework + "/input" + "_" + str(remote_input_dir_num) + '/annotations/'
@@ -106,8 +106,8 @@ def yolo_inference(info, model_type):
                         'cd /home/daree/dev/darknet ; /home/daree/dev/darknet/AI_application_255.sh ' + model_name + ' ' + remote_input_dir_images + ' ' + iou_thresh + ' ' + '0.005' + ' -save_labels')
 
             print("---------->   Model inference end")
-            output_images_path = os.path.join('output', model_name, output_dir, model_type, 'images')
-            output_annotations_path = os.path.join('output', model_name, output_dir, model_type, 'annotations')
+            output_images_path = os.path.join(output_dir, model_type, 'images')
+            output_annotations_path = os.path.join(output_dir, model_type, 'annotations')
             if not os.path.exists(output_images_path):
                 os.makedirs(output_images_path)
             if not os.path.exists(output_annotations_path):
@@ -118,9 +118,9 @@ def yolo_inference(info, model_type):
             for filename in partial_send_file_list:
                 img_recv_cnt += 1
                 ssh_manager.get_file(remote_input_dir_images + 'results/' + filename[:-3] + 'jpg',
-                                    os.path.join(current_path, output_images_path, filename[:-3] + 'jpg'))  # download images file
+                                    os.path.join(output_images_path, filename[:-3] + 'jpg'))  # download images file
                 ssh_manager.get_file(remote_input_dir_annotations + filename[:-3] + 'txt',
-                                    os.path.join(current_path, output_annotations_path, filename[:-3] + 'txt'))  # download annotations file
+                                    os.path.join(output_annotations_path, filename[:-3] + 'txt'))  # download annotations file
 
                 print ('\r', " " * line_clean_count, end='\r')
                 print (f"{filename} Receiving....\r", end=' ')
@@ -154,8 +154,9 @@ def yolo_inference(info, model_type):
 
         print("---------->   Model inference end")
 
-        output_images_path = os.path.join('output', model_name, output_dir, model_type, 'images')
-        output_annotations_path = os.path.join('output', model_name, output_dir, model_type, 'annotations')
+        output_images_path = os.path.join(output_dir, model_type, 'images')
+        output_annotations_path = os.path.join(output_dir, model_type, 'annotations')
+
         if not os.path.exists(output_images_path):
             os.makedirs(output_images_path)
         if not os.path.exists(output_annotations_path):
@@ -166,9 +167,9 @@ def yolo_inference(info, model_type):
         for filename in partial_send_file_list:
             img_recv_cnt += 1
             ssh_manager.get_file(remote_input_dir_images + 'results/' + filename[:-3] + 'jpg',
-                                os.path.join(current_path, output_images_path,filename[:-3] + 'jpg'))  # download images file
+                                os.path.join(output_images_path,filename[:-3] + 'jpg'))  # download images file
             ssh_manager.get_file(remote_input_dir_annotations + filename[:-3] + 'txt',
-                                os.path.join(current_path, output_annotations_path, filename[:-3] + 'txt'))  # download annotations file
+                                os.path.join(output_annotations_path, filename[:-3] + 'txt'))  # download annotations file
 
             print ('\r', " " * line_clean_count, end='\r')
             print (f"{filename} Receiving....\r", end=' ')
@@ -185,6 +186,7 @@ def yolo_inference(info, model_type):
     ssh_manager.close_ssh_client() # 세션종료
 
     print(f"---------->   {model_name} Model Inference Complete")
+    return True
 
 
 if __name__=="__main__":

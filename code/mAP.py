@@ -63,11 +63,16 @@ def getBoundingBoxes(directory, isGT, bbFormat, coordType, allBoundingBoxes=None
                 x, y, w, h = map(float, splitLine[2:6])
                 bb = BoundingBox(nameOfImage, idClass, x, y, w, h, coordType, imgSize, BBType.Detected, confidence, format=bbFormat)
             allBoundingBoxes.addBoundingBox(bb)
+
             if idClass not in allClasses:
                 allClasses.append(idClass)
         fh1.close()
     
-    print(f"Loaded {len(allBoundingBoxes.getBoundingBoxes())} bounding boxes from {directory}")
+    # print(f"Loaded {len(allBoundingBoxes.getBoundingBoxes())} bounding boxes from {directory}")
+    if isGT:
+        print(f"Loaded {len(allBoundingBoxes.getBoundingBoxesByType(BBType.GroundTruth))} bounding boxes from {directory}")
+    else:
+        print(f"Loaded {len(allBoundingBoxes.getBoundingBoxesByType(BBType.Detected))} bounding boxes from {directory}")
     return allBoundingBoxes, allClasses
 
 # Main processing function
@@ -87,12 +92,22 @@ def process_evaluation(gtFolder, detFolder, class_num, threshold=0.25, iouThresh
                                                     method=MethodAveragePrecision.EveryPointInterpolation, showAP=True, showInterpolatedPrecision=True, savePath=savePath, showGraphic=False)
     
     ap_values = [m['AP'] for m in detections]
-    
+    total_tp = [m['total TP'] for m in detections]
+    total_fp = [m['total FP'] for m in detections]
+    total_fn = [m['total FN'] for m in detections]
+
     # Filter out nan values
     ap_values = [ap for ap in ap_values if not math.isnan(ap)]
-    
+
+    cur_precison = float(sum(total_tp) / (sum(total_tp) + sum(total_fp)))
+    cur_recall = float(sum(total_tp) / (sum(total_tp) + sum(total_fn)))
+    f1_score = 2 * cur_precison * cur_recall / (cur_precison + cur_recall)
     mAP = sum(ap_values) / class_num if ap_values else 0
-    print(f"mAP: {mAP:.2%}")
+
+    print(f" for conf_thresh = {threshold}, precision = {cur_precison:.2}, recall = {cur_recall:.2}, F1-score = {f1_score:.2}")
+    print(f" for conf_thresh = {threshold}, TP = {int(sum(total_tp))}, FP = {int(sum(total_fp))}, FN = {int(sum(total_fn))}")
+    print(f" mAP@{iouThreshold} = {mAP:.2%}")
+
     return mAP
 
 if __name__ == "__main__":
