@@ -215,26 +215,26 @@ def remove_non_pothole_bboxes(config, annot_dir, new_annot_dir, classification_r
         print(f"✅ 모든 TXT 어노테이션 파일 업데이트 완료!")
 
 
-# def validate_paths(config):
-#     """필요한 경로들이 존재하는지 확인"""
-#     paths = {
-#         "input_path": config["input_path"],
-#         "output_dir": config["output_dir"],
-#         "edge_output": os.path.join(config["output_dir"], 'edge'),
-#         "server_output": os.path.join(config["output_dir"], 'server'),
-#         "classification_output": os.path.join(config["output_dir"], 'classification')
-#     }
-#
-#     for name, path in paths.items():
-#         if not os.path.exists(path):
-#             try:
-#                 os.makedirs(path)
-#                 print(f"✅ 생성됨: {path}")
-#             except Exception as e:
-#                 print(f"❌ 경로 생성 실패 ({name}): {path}")
-#                 print(f"   오류: {str(e)}")
-#                 return False
-#     return True
+def validate_paths(config):
+    """필요한 경로들이 존재하는지 확인"""
+    paths = {
+        "input_path": config["input_path"],
+        "output_dir": config["output_dir"],
+        # "edge_output": os.path.join(config["output_dir"], 'edge'),
+        # "server_output": os.path.join(config["output_dir"], 'server'),
+        # "classification_output": os.path.join(config["output_dir"], 'classification')
+    }
+
+    for name, path in paths.items():
+        if not os.path.exists(path):
+            try:
+                os.makedirs(path)
+                print(f"✅ 생성됨: {path}")
+            except Exception as e:
+                print(f"❌ 경로 생성 실패 ({name}): {path}")
+                print(f"   오류: {str(e)}")
+                return False
+    return True
 
 def check_previous_step_results(config, step):
     """이전 단계의 결과가 존재하는지 확인"""
@@ -255,10 +255,10 @@ def main():
     # 1️⃣ 설정 로드
     config = load_config(CONFIG_PATH)
     
-    # # 경로 검증
-    # if not validate_paths(config):
-    #     print("⚠️ 필요한 경로 생성에 실패했습니다. 프로그램을 종료합니다.")
-    #     return
+    # 경로 검증
+    if not validate_paths(config):
+        print("⚠️ 필요한 경로 생성에 실패했습니다. 프로그램을 종료합니다.")
+        return
 
     gt_data_path = os.path.join(config["input_path"], "annotations")
     edge_data_path = os.path.join(config["output_dir"], 'edge', "annotations")
