@@ -215,26 +215,26 @@ def remove_non_pothole_bboxes(config, annot_dir, new_annot_dir, classification_r
         print(f"✅ 모든 TXT 어노테이션 파일 업데이트 완료!")
 
 
-def validate_paths(config):
-    """필요한 경로들이 존재하는지 확인"""
-    paths = {
-        "input_path": config["input_path"],
-        "output_dir": config["output_dir"],
-        "edge_output": os.path.join(config["output_dir"], 'edge'),
-        "server_output": os.path.join(config["output_dir"], 'server'),
-        "classification_output": os.path.join(config["output_dir"], 'classification')
-    }
-    
-    for name, path in paths.items():
-        if not os.path.exists(path):
-            try:
-                os.makedirs(path)
-                print(f"✅ 생성됨: {path}")
-            except Exception as e:
-                print(f"❌ 경로 생성 실패 ({name}): {path}")
-                print(f"   오류: {str(e)}")
-                return False
-    return True
+# def validate_paths(config):
+#     """필요한 경로들이 존재하는지 확인"""
+#     paths = {
+#         "input_path": config["input_path"],
+#         "output_dir": config["output_dir"],
+#         "edge_output": os.path.join(config["output_dir"], 'edge'),
+#         "server_output": os.path.join(config["output_dir"], 'server'),
+#         "classification_output": os.path.join(config["output_dir"], 'classification')
+#     }
+#
+#     for name, path in paths.items():
+#         if not os.path.exists(path):
+#             try:
+#                 os.makedirs(path)
+#                 print(f"✅ 생성됨: {path}")
+#             except Exception as e:
+#                 print(f"❌ 경로 생성 실패 ({name}): {path}")
+#                 print(f"   오류: {str(e)}")
+#                 return False
+#     return True
 
 def check_previous_step_results(config, step):
     """이전 단계의 결과가 존재하는지 확인"""
@@ -255,10 +255,10 @@ def main():
     # 1️⃣ 설정 로드
     config = load_config(CONFIG_PATH)
     
-    # 경로 검증
-    if not validate_paths(config):
-        print("⚠️ 필요한 경로 생성에 실패했습니다. 프로그램을 종료합니다.")
-        return
+    # # 경로 검증
+    # if not validate_paths(config):
+    #     print("⚠️ 필요한 경로 생성에 실패했습니다. 프로그램을 종료합니다.")
+    #     return
 
     gt_data_path = os.path.join(config["input_path"], "annotations")
     edge_data_path = os.path.join(config["output_dir"], 'edge', "annotations")
@@ -284,14 +284,19 @@ def main():
                     print(f"⚠️ Classification 단계 실행을 건너뜁니다 (Server 모델 결과 없음)")
                     continue
 
-            # 나머지 코드는 그대로 유지
             if step == "edge":
+                if not os.path.exists(edge_data_path):
+                    os.makedirs(edge_data_path, exist_ok=True)
+
                 result = run_edge_model(config)
                 if not result:
                     print("❌ Edge 모델 실행 실패")
                     continue
 
             elif step == "server":
+                if not os.path.exists(server_data_path):
+                    os.makedirs(server_data_path, exist_ok=True)
+
                 # edge 모델 결과가 있으면 사용, 없으면 전체 데이터셋에 대해 실행
                 image_folder = os.path.join(config["input_path"], "images")
                 num_gt_data = len([f for f in glob.glob(os.path.join(image_folder, "*.jpg"))])
@@ -318,6 +323,8 @@ def main():
                     continue
 
             elif step == "classification":
+                if not os.path.exists(classification_data_path):
+                    os.makedirs(classification_data_path, exist_ok=True)
                 result = run_classification_model(config)
                 if not result:
                     print("❌ Classification 모델 실행 실패")
@@ -327,8 +334,7 @@ def main():
                 remove_non_pothole_bboxes(config, server_data_path, classification_data_path, classification_results=result, debug_mode=True)
 
             # 각 단계마다 evaluation 실행 여부 확인
-            evaluation_per_step = config.get("evaluation_per_step", False)
-            if evaluation_per_step:
+            if config.get("evaluation_per_step", False):
                 curr_annot_path = {
                     "edge": edge_data_path,
                     "server": server_data_path,
@@ -339,12 +345,18 @@ def main():
                     run_evaluation(gt_data_path, curr_annot_path, config, step)
                 else:
                     print(f"⚠️ {step} 단계의 평가를 건너뜁니다. 결과 파일이 없습니다.")
-            else:
-                if os.path.exists(curr_annot_path):
-                    run_evaluation(gt_data_path, curr_annot_path, config, step)
+
         except Exception as e:
             print(f"❌ {step} 단계 실행 중 오류 발생: {str(e)}")
             continue
+    
+    if not config.get("evaluation_per_step", False):
+        final_annot_path = classification_data_path if "classification" in selected_steps else (
+            server_data_path if "server" in selected_steps else edge_data_path)
+        if os.path.exists(final_annot_path):
+            run_evaluation(gt_data_path, final_annot_path, config, "final")
+        else:
+            print("⚠️ 최종 평가를 건너뜁니다. 결과 파일이 없습니다.")
 
     print("\n✅ 모든 선택된 단계를 실행 완료!")
 

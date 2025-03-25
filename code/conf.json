@@ -1,6 +1,6 @@
 {
   "timeout": 10,
-  "model_pipeline": ["server", "classification"],
+  "model_pipeline": ["server"],
   "__model_pipeline__": ["edge", "server", "classification", "ensemble"],
 
   "detection_host":"192.168.0.75",
@@ -11,23 +11,23 @@
   "classification_username":"daree",
   "classification_password":"riaas",
 
+  "thresh": "0.25",
+  "iou_thresh": "0.5",
+
   "edge_model_framework": "darknet",
   "server_model_framework": "darknet",
   "__detection_model_framework__": "darknet, darknet255, yolov7",
 
-  "edge_model_name":"230726_multiobject_tiny",
+  "edge_model_name":"231124_multiobject_fast_gpu_608",
   "server_model_name":"230726_multiobject_tiny",
   "__detection_model_name__": "231124_multiobject_fast_gpu_608, 230726_multiobject_tiny",
-
-  "iou_thresh": "0.5",
-  "thresh": "0.25",
 
   "classification_model_type": "pothole",
   "__classification_model_type__": "pothole, debris",
   "classification_model_name":"250227_testcase_05",
 
-  "input_path" : "C:\\Users\\nayou\\Desktop\\Yolo_ConvNext_Pipeline\\data\\japan",
-  "output_dir" : "C:\\Users\\nayou\\Desktop\\Yolo_ConvNext_Pipeline\\results\\japan",
+  "input_path" : "C:\\Users\\nayou\\Desktop\\Yolo_ConvNext_Pipeline\\data\\250314-250320_korea\\human_reject\\2025-03-15",
+  "output_dir" : "C:\\Users\\nayou\\Desktop\\Yolo_ConvNext_Pipeline\\results\\250314-250320_korea\\230726_multiobject_tiny\\human_reject",
 
   "evaluation_per_step": false
 }

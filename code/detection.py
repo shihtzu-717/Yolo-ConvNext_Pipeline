@@ -32,7 +32,7 @@ def yolo_inference(info, model_type, filelist=None):
     print(f"- IoU-threshold: {iou_thresh}")
     print(f"- Model Name : {model_name}")
     print(f"- Input Directory : {input_path}")
-    print(f"- Output Directory : {output_dir}_{model_name}")
+    print(f"- Output Directory : {output_dir}/server")
     print(f"- Host IP : {host}")
     print("==================================================================================================================\n")
 
