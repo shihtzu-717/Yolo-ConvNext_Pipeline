@@ -54,7 +54,7 @@ def convnext_inference(info, mode_type):
     ssh_manager.create_ssh_client(host, username, password,timeout) # 세션 생성
 
     img_path = input_path
-    annot_path = os.path.join(output_dir, 'edge', 'annotations')
+    annot_path = os.path.join(output_dir, 'server', 'annotations')
     print(f'img_path = {img_path}\n annot_path= {annot_path}')
 
     img_filelist = sorted(glob.glob(img_path+'\\**\\*.jpg', recursive=True) + glob.glob(img_path+'\\**\\*.png', recursive=True))

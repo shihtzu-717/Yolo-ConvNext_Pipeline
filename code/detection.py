@@ -32,7 +32,7 @@ def yolo_inference(info, model_type, filelist=None):
     print(f"- IoU-threshold: {iou_thresh}")
     print(f"- Model Name : {model_name}")
     print(f"- Input Directory : {input_path}")
-    print(f"- Output Directory : {output_dir}/server")
+    print(f"- Output Directory : {output_dir}/{model_type}")
     print(f"- Host IP : {host}")
     print("==================================================================================================================\n")
 
@@ -56,7 +56,7 @@ def yolo_inference(info, model_type, filelist=None):
     print( f"---------->   Create ssh client : {host}" )
     ssh_manager.create_ssh_client(host, username, password, timeout) # 세션생성
 
-    if filelist == None:
+    if not filelist:
         print(f'input_path = {input_path}')
         filelist = glob.glob(input_path+'\\**\\*.jpg', recursive=True) + glob.glob(input_path+'\\**\\*.png', recursive=True)
     else:
@@ -97,13 +97,14 @@ def yolo_inference(info, model_type, filelist=None):
             print("---------->   Success uploading all image files complete")
             print("---------->   Model inference start")
 
+            # 1. darknet - 중간 배치 구간
             if model_framework == 'darknet':
                 ssh_manager.send_command_long_time(
-                        'cd /home/daree/dev/darknet ; /home/daree/dev/darknet/AI_application.sh ' + model_name + ' ' + remote_input_dir_images + ' ' + iou_thresh + ' ' + '0.005' + ' -save_labels')
+                    f'cd /home/daree/dev/darknet ; /home/daree/dev/darknet/AI_pipeline.sh {model_name} {remote_input_dir_images} {iou_thresh} 0.005 -save_labels')
 
             elif model_framework == 'darknet255':
                 ssh_manager.send_command_long_time(
-                        'cd /home/daree/dev/darknet ; /home/daree/dev/darknet/AI_application_255.sh ' + model_name + ' ' + remote_input_dir_images + ' ' + iou_thresh + ' ' + '0.005' + ' -save_labels')
+                    f'cd /home/daree/dev/darknet ; /home/daree/dev/darknet/AI_pipeline_255.sh {model_name} {remote_input_dir_images} {iou_thresh} 0.005 -save_labels')
 
             print("---------->   Model inference end")
             output_images_path = os.path.join(output_dir, model_type, 'images')
@@ -144,13 +145,14 @@ def yolo_inference(info, model_type, filelist=None):
         print("---------->   Success uploading all image files complete")
         print("---------->   Model inference start")
 
+        # 2. darknet - 마지막 남은 배치 처리 구간
         if model_framework == 'darknet':
             ssh_manager.send_command_long_time(
-                    'cd /home/daree/dev/darknet ; /home/daree/dev/darknet/AI_pipeline.sh ' + model_name + ' ' + remote_input_dir_images + ' ' + iou_thresh + ' ' + '0.005' + ' -save_labels')
+                f'cd /home/daree/dev/darknet ; /home/daree/dev/darknet/AI_pipeline.sh {model_name} {remote_input_dir_images} {iou_thresh} 0.005 -save_labels')
 
         elif model_framework == 'darknet255':
             ssh_manager.send_command_long_time(
-                    'cd /home/daree/dev/darknet ; /home/daree/dev/darknet/AI_application_255.sh ' + model_name + ' ' + remote_input_dir_images + ' ' + iou_thresh + ' ' + '0.005' + ' -save_labels')
+                f'cd /home/daree/dev/darknet ; /home/daree/dev/darknet/AI_pipeline_255.sh {model_name} {remote_input_dir_images} {iou_thresh} 0.005 -save_labels')
 
         print("---------->   Model inference end")
 

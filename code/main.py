@@ -3,6 +3,9 @@ import glob
 import os
 import json
 import shutil
+
+from tqdm import tqdm
+
 import detection
 import classification
 import mAP
@@ -36,11 +39,6 @@ def run_edge_model(config):
 def run_server_model(config, filelist=None):
     """Server Model 탐지 실행"""
     print("🚀 Server Model 탐지 실행 중...")
-    # filelist가 None이면 전체 이미지에 대해 실행
-    if filelist is None:
-        filelist = glob.glob(config["input_path"]+'\\**\\*.jpg', recursive=True) +\
-              glob.glob(config["input_path"]+'\\**\\*.png', recursive=True)
-    
     try:
         detection.yolo_inference(config, 'server', filelist)
         print("✅ Server Model 탐지 완료!")
@@ -75,20 +73,20 @@ def run_evaluation(gt_data_path, det_data_path, config, step):
     results = mAP.process_evaluation(gt_data_path, det_data_path, class_num, threshold=float(config['thresh']), iouThreshold=float(config['iou_thresh']), savePath=results_data_path, showPlot=False)
     print("✅ 성능 평가 완료!")
 
-def remove_non_object_bboxes(config, edge_annot_path):
+def remove_non_object_bboxes(config, annot_path):
     """
     탐지된 객체가 있는 어노테이션 파일을 찾고, 해당 이미지 경로 리스트를 반환하는 함수.
 
     Args:
         config (dict): 설정 파일 (input_path 포함)
-        edge_annot_path (str): 어노테이션 파일이 저장된 경로
+        annot_path (str): 어노테이션 파일이 저장된 경로
 
     Returns:
         list: 존재하는 이미지 경로 리스트
     """
     remove_image_list = []
     valid_image_paths = []
-    edge_annot_list = glob.glob(os.path.join(edge_annot_path, "**/*.txt"), recursive=True)
+    edge_annot_list = glob.glob(os.path.join(annot_path, "**/*.txt"), recursive=True)
 
     for edge_annot in edge_annot_list:
         with open(edge_annot, 'r') as f:
@@ -251,8 +249,16 @@ def check_previous_step_results(config, step):
             return False
     return True
 
+
+def load_edge_none_object_data(remove_file_list, server_data_path):
+    print(f"📂 성능 지표 계산을 위해 Edge 모델이 미탐지된 데이터 {len(remove_file_list)} 개를 불러옵니다.")
+
+    for remove_file in tqdm(remove_file_list):
+        shutil.copy2(remove_file, server_data_path)
+
 def main():
     # 1️⃣ 설정 로드
+    remove_file_list = []
     config = load_config(CONFIG_PATH)
     
     # 경로 검증
@@ -273,7 +279,7 @@ def main():
         print("⚠️ 실행할 단계가 설정되지 않았습니다. 프로그램을 종료합니다.")
         return
 
-    print(f"🔹 실행할 단계: {', '.join(selected_steps)}\n")
+    print(f"🔹 실행할 단계: {', '.join(selected_steps)}")
 
     # 2️⃣ 선택된 단계 실행
     for step in selected_steps:
@@ -308,16 +314,27 @@ def main():
                         file_list = None
                     elif len(remove_file_list) == 0 and len(file_list) != num_gt_data:
                         print(f"⚠️ Edge 모델 결과: {len(file_list)}개, 전체 데이터셋: {num_gt_data}개")
-                        print("⚠️ Edge 모델 결과와 전체 데이터셋의 이미지 수가 다릅니다. 전체 데이터셋을 처리합니다.")
+                        print("⚠️ Edge 모델 결과와 전체 입력 데이터의 수가 다릅니다. 전체 데이터셋을 처리합니다.")
                         file_list = None
                     elif len(remove_file_list) > 0:
-                        print("⚠️ Edge 모델 결과 아래 이미지에서 객체가 탐지되지 않아 제외한 나머지 데이터셋을 처리합니다.")
-                        print(f for f in remove_file_list)
+                        if len(remove_file_list) == num_gt_data:
+                            print("⚠️ Edge 모델 결과, 모든 입력 데이터가 탐지되지 않아 성능 평가를 종료합니다.")
+                            sys.exit(1)
+                        else:
+                            print("⚠️ Edge 모델 결과 아래 이미지에서 객체가 탐지되지 않아 제외한 나머지 데이터셋을 처리합니다.")
+                            for f in remove_file_list:
+                                print(f)
+
                 else:
                     print("⚠️ Edge 모델 결과가 없어 전체 데이터셋을 처리합니다.")
                     file_list = None
                 
                 success = run_server_model(config, file_list)
+
+                # edge 모델이 미탐지한 데이터 가져오기
+                if os.path.exists(edge_data_path) and remove_file_list:
+                    load_edge_none_object_data(remove_file_list, server_data_path)
+
                 if not success:
                     print("❌ Server 모델 실행 실패")
                     continue

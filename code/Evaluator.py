@@ -184,7 +184,7 @@ class Evaluator:
         self,
         boundingBoxes,
         conf_threshold=0.25,
-        IOUThreshold=0.45,
+        IOUThreshold=0.5,
         method=MethodAveragePrecision.EveryPointInterpolation,
         showAP=False,
         showInterpolatedPrecision=False,
