@@ -2,14 +2,14 @@
   "timeout": 10,
   "evaluation_per_step": false,
 
-  "model_pipeline": ["server", "classification"],
+  "model_pipeline": ["edge", "server", "classification"],
   "__model_pipeline__": ["edge", "server", "classification"],
 
   "thresh": 0.25,
   "iou_thresh": 0.5,
 
-  "input_path": "C:\\Users\\nayou\\Desktop\\Yolo_ConvNext_Pipeline\\data\\250314_seoul\\system_reject\\2025-03-14",
-  "output_dir": "C:\\Users\\nayou\\Desktop\\Yolo_ConvNext_Pipeline\\results\\250314_seoul\\system_reject",
+  "input_path": "C:\\Users\\nayou\\Desktop\\Yolo_ConvNext_Pipeline\\data\\testdata",
+  "output_dir": "C:\\Users\\nayou\\Desktop\\Yolo_ConvNext_Pipeline\\results\\testdata",
 
   "edge_model_framework": "darknet",
   "server_model_framework": "darknet",

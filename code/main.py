@@ -186,7 +186,7 @@ def remove_non_pothole_bboxes(config, annot_dir, new_annot_dir, classification_r
                 for line in new_lines:
                     print(f"   {line}")
             else:
-                print("   🚫 모든 0번 클래스 바운딩 박스 제거됨 (빈 파일로 유지)")
+                print("   🚫 모든 0번 클래스 바운딩 박스 제거됨")
 
             print("====================================\n")
 
@@ -207,7 +207,7 @@ def remove_non_pothole_bboxes(config, annot_dir, new_annot_dir, classification_r
             dest_path = os.path.join(new_annot_dir, txt_file)
             shutil.copy2(src_path, dest_path)
             if debug_mode:
-                print(f"✅ [복사됨] {txt_file} → 수정되지 않은 파일 그대로 유지")
+                print(f"✅ [복사됨] {txt_file} → 수정하지 않은 파일은 server/annots에서 class/annots로 파일 복사")
 
     if debug_mode:
         print(f"✅ 모든 TXT 어노테이션 파일 업데이트 완료!")
