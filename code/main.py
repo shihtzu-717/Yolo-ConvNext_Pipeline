@@ -168,8 +168,8 @@ def remove_non_pothole_bboxes(config, annot_dir, new_annot_dir, classification_r
                 # **0번 클래스 중 is_pothole=False인 바운딩 박스 제거**
                 if cls_id == 0 and bbox in bbox_list:
                     if debug_mode:
-                        print(f"🚨 [제거됨] {txt_path} → {bbox}")
-                    continue  # 제거 대상이면 저장하지 않음
+                        print(f"🚨 [제거됨] {txt_path} → {bbox}") # 제거 대상이면 저장하지 않음
+                    continue
 
                 new_lines.append(line.strip())
 
@@ -251,7 +251,7 @@ def check_previous_step_results(config, step):
 
 
 def load_edge_none_object_data(remove_file_list, server_data_path):
-    print(f"📂 성능 지표 계산을 위해 Edge 모델이 미탐지된 데이터 {len(remove_file_list)} 개를 불러옵니다.")
+    print(f"📂 성능 지표 계산을 위해 Edge 모델이 미탐지한 데이터 {len(remove_file_list)} 개를 불러옵니다.")
 
     for remove_file in tqdm(remove_file_list):
         shutil.copy2(remove_file, server_data_path)

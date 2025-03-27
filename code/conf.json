@@ -2,20 +2,20 @@
   "timeout": 10,
   "evaluation_per_step": false,
 
-  "model_pipeline": ["edge", "server"],
+  "model_pipeline": ["server", "classification"],
   "__model_pipeline__": ["edge", "server", "classification"],
 
   "thresh": 0.25,
   "iou_thresh": 0.5,
 
-  "input_path": "C:\\Users\\nayou\\Desktop\\Yolo_ConvNext_Pipeline\\data\\testdata",
-  "output_dir": "C:\\Users\\nayou\\Desktop\\Yolo_ConvNext_Pipeline\\results\\testdata2",
+  "input_path": "C:\\Users\\nayou\\Desktop\\Yolo_ConvNext_Pipeline\\data\\250314_seoul\\system_reject\\2025-03-14",
+  "output_dir": "C:\\Users\\nayou\\Desktop\\Yolo_ConvNext_Pipeline\\results\\250314_seoul\\system_reject",
 
-  "edge_model_framework": "darknet255",
+  "edge_model_framework": "darknet",
   "server_model_framework": "darknet",
   "__detection_model_framework__": ["darknet", "darknet255"],
 
-  "edge_model_name": "C10-ARA-DSP",
+  "edge_model_name": "231124_multiobject_fast_gpu_608",
   "server_model_name": "230726_multiobject_tiny",
   "__detection_model_name__": ["231124_multiobject_fast_gpu_608", "230726_multiobject_tiny"],
 

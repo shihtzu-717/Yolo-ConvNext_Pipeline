@@ -107,6 +107,7 @@ def convnext_inference(info, mode_type):
                 ssh_manager.send_command_long_time(
                     f"cd /data/classifier/model_pipeline ; \
                     python inference.py \
+                    --model_type pothole \
                     --resume best_model/{model_name}/checkpoint-best_weights.pth  \
                     --input_img_path {remote_input_dir}/images \
                     --input_annot_path {remote_input_dir}/annotations \
@@ -116,6 +117,7 @@ def convnext_inference(info, mode_type):
                 ssh_manager.send_command_long_time(
                     f"cd /data/classifier/model_pipeline ; \
                     python inference.py \
+                    --model_type debris \
                     --resume best_model/{model_name}/checkpoint-best_weights.pth  \
                     --input_img_path {remote_input_dir}/images \
                     --input_annot_path {remote_input_dir}/annotations \
