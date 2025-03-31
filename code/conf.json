@@ -1,6 +1,6 @@
 {
   "timeout": 10,
-  "evaluation_per_step": false,
+  "evaluation_per_step": true,
 
   "model_pipeline": ["edge", "server", "classification"],
   "__model_pipeline__": ["edge", "server", "classification"],
@@ -8,16 +8,17 @@
   "thresh": 0.25,
   "iou_thresh": 0.5,
 
-  "input_path": "C:\\Users\\nayou\\Desktop\\Yolo_ConvNext_Pipeline\\data\\testdata",
-  "output_dir": "C:\\Users\\nayou\\Desktop\\Yolo_ConvNext_Pipeline\\results\\testdata",
+  "input_path": "C:\\Users\\nayou\\Desktop\\Yolo_ConvNext_Pipeline\\data\\KTL",
+  "output_dir": "C:\\Users\\nayou\\Desktop\\Yolo_ConvNext_Pipeline\\results\\KTL",
 
   "edge_model_framework": "darknet",
   "server_model_framework": "darknet",
   "__detection_model_framework__": ["darknet", "darknet255"],
 
-  "edge_model_name": "231124_multiobject_fast_gpu_608",
-  "server_model_name": "230726_multiobject_tiny",
+  "edge_model_name": "20240501_Basic_c10_Dev_Fastest_608_GPU",
+  "server_model_name": "20240501_Basic_c10_server_1024_tiny",
   "__detection_model_name__": ["231124_multiobject_fast_gpu_608", "230726_multiobject_tiny"],
+  "gpu_num": "1",
 
   "classification_model_type": "pothole",
   "__classification_model_type__": ["pothole", "debris"],

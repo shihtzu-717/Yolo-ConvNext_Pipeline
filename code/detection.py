@@ -22,6 +22,7 @@ def yolo_inference(info, model_type, filelist=None):
     thresh = info["thresh"]
     input_path = info["input_path"]
     output_dir = info["output_dir"]
+    gpu_num = info["gpu_num"]
 
     print("\n\n==================================================================================================================")
     print(f"                                         * {AI_APPLICATION_VERION} - {(model_type).upper()} *")
@@ -31,6 +32,7 @@ def yolo_inference(info, model_type, filelist=None):
     print(f"- threshold: {thresh}")
     print(f"- IoU-threshold: {iou_thresh}")
     print(f"- Model Name : {model_name}")
+    print(f"- GPU Number : {gpu_num}")
     print(f"- Input Directory : {input_path}")
     print(f"- Output Directory : {output_dir}/{model_type}")
     print(f"- Host IP : {host}")
@@ -100,11 +102,11 @@ def yolo_inference(info, model_type, filelist=None):
             # 1. darknet - 중간 배치 구간
             if model_framework == 'darknet':
                 ssh_manager.send_command_long_time(
-                    f'cd /home/daree/dev/darknet ; /home/daree/dev/darknet/AI_pipeline.sh {model_name} {remote_input_dir_images} {iou_thresh} 0.005 -save_labels')
+                    f'cd /home/daree/dev/darknet ; /home/daree/dev/darknet/AI_pipeline.sh {model_name} {remote_input_dir_images} {iou_thresh} 0.005 -save_labels {gpu_num}')
 
             elif model_framework == 'darknet255':
                 ssh_manager.send_command_long_time(
-                    f'cd /home/daree/dev/darknet ; /home/daree/dev/darknet/AI_pipeline_255.sh {model_name} {remote_input_dir_images} {iou_thresh} 0.005 -save_labels')
+                    f'cd /home/daree/dev/darknet ; /home/daree/dev/darknet/AI_pipeline_255.sh {model_name} {remote_input_dir_images} {iou_thresh} 0.005 -save_labels {gpu_num}')
 
             print("---------->   Model inference end")
             output_images_path = os.path.join(output_dir, model_type, 'images')
@@ -118,8 +120,8 @@ def yolo_inference(info, model_type, filelist=None):
             img_recv_cnt = 0
             for filename in partial_send_file_list:
                 img_recv_cnt += 1
-                ssh_manager.get_file(remote_input_dir_images + 'results/' + filename[:-3] + 'jpg',
-                                    os.path.join(output_images_path, filename[:-3] + 'jpg'))  # download images file
+                # ssh_manager.get_file(remote_input_dir_images + 'results/' + filename[:-3] + 'jpg',
+                #                     os.path.join(output_images_path, filename[:-3] + 'jpg'))  # download images file
                 ssh_manager.get_file(remote_input_dir_annotations + filename[:-3] + 'txt',
                                     os.path.join(output_annotations_path, filename[:-3] + 'txt'))  # download annotations file
 
@@ -148,11 +150,11 @@ def yolo_inference(info, model_type, filelist=None):
         # 2. darknet - 마지막 남은 배치 처리 구간
         if model_framework == 'darknet':
             ssh_manager.send_command_long_time(
-                f'cd /home/daree/dev/darknet ; /home/daree/dev/darknet/AI_pipeline.sh {model_name} {remote_input_dir_images} {iou_thresh} 0.005 -save_labels')
+                f'cd /home/daree/dev/darknet ; /home/daree/dev/darknet/AI_pipeline.sh {model_name} {remote_input_dir_images} {iou_thresh} 0.005 -save_labels {gpu_num}')
 
         elif model_framework == 'darknet255':
             ssh_manager.send_command_long_time(
-                f'cd /home/daree/dev/darknet ; /home/daree/dev/darknet/AI_pipeline_255.sh {model_name} {remote_input_dir_images} {iou_thresh} 0.005 -save_labels')
+                f'cd /home/daree/dev/darknet ; /home/daree/dev/darknet/AI_pipeline_255.sh {model_name} {remote_input_dir_images} {iou_thresh} 0.005 -save_labels {gpu_num}')
 
         print("---------->   Model inference end")
 
@@ -168,8 +170,8 @@ def yolo_inference(info, model_type, filelist=None):
         img_recv_cnt = 0
         for filename in partial_send_file_list:
             img_recv_cnt += 1
-            ssh_manager.get_file(remote_input_dir_images + 'results/' + filename[:-3] + 'jpg',
-                                os.path.join(output_images_path,filename[:-3] + 'jpg'))  # download images file
+            # ssh_manager.get_file(remote_input_dir_images + 'results/' + filename[:-3] + 'jpg',
+            #                     os.path.join(output_images_path,filename[:-3] + 'jpg'))  # download images file
             ssh_manager.get_file(remote_input_dir_annotations + filename[:-3] + 'txt',
                                 os.path.join(output_annotations_path, filename[:-3] + 'txt'))  # download annotations file
 

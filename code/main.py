@@ -175,7 +175,7 @@ def remove_non_pothole_bboxes(config, annot_dir, new_annot_dir, classification_r
 
         # 4️⃣ 기존 어노테이션과 비교하여 출력 (디버그 모드에서만)
         if debug_mode:
-            print("\n====================================")
+            print("====================================")
             print(f"📂 {img_name}.txt 변경 내용")
             print("📌 [Before] 기존 어노테이션:")
             for line in before_lines:
@@ -280,7 +280,7 @@ def main():
         return
 
     print(f"🔹 실행할 단계: {', '.join(selected_steps)}")
-
+    
     # 2️⃣ 선택된 단계 실행
     for step in selected_steps:
         try:
