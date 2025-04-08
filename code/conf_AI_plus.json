@@ -8,8 +8,8 @@
   "thresh": 0.25,
   "iou_thresh": 0.5,
 
-  "input_path": "C:\\Users\\nayou\\Desktop\\Yolo_ConvNext_Pipeline\\data\\KTL",
-  "output_dir": "C:\\Users\\nayou\\Desktop\\Yolo_ConvNext_Pipeline\\results\\KTL",
+  "input_path": "C:\\Users\\nayou\\Desktop\\AI_Plus_Testset\\Pothole",
+  "output_dir": "C:\\Users\\nayou\\Desktop\\AI_Plus_Testset\\Pothole",
 
   "edge_model_framework": "darknet",
   "server_model_framework": "darknet",

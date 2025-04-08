@@ -103,10 +103,13 @@ def process_evaluation(gtFolder, detFolder, class_num, threshold=0.25, iouThresh
     cur_recall = float(sum(total_tp) / (sum(total_tp) + sum(total_fn)))
     f1_score = 2 * cur_precison * cur_recall / (cur_precison + cur_recall)
     mAP = sum(ap_values) / class_num if ap_values else 0
+    error_rate = float((sum(total_fp) + sum(total_fn)) / (sum(total_tp) + sum(total_fp) + sum(total_fn))) if float(sum(total_tp) + sum(total_fp) + sum(total_fn)) > 0  else 0.0
+    accuracy = float(sum(total_tp) / (sum(total_tp) + sum(total_fn))) if sum(total_tp) + sum(total_fn) > 0 else 0.0
 
     print(f" for conf_thresh = {threshold}, precision = {cur_precison:.2}, recall = {cur_recall:.2}, F1-score = {f1_score:.2}")
     print(f" for conf_thresh = {threshold}, TP = {int(sum(total_tp))}, FP = {int(sum(total_fp))}, FN = {int(sum(total_fn))}")
     print(f" mAP@{iouThreshold} = {mAP:.2%}")
+    print(f" Error_Rate = {error_rate:.2%}, Accuracy = {accuracy:2%}")
 
     return mAP
 

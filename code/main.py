@@ -5,6 +5,7 @@ import json
 import shutil
 
 from tqdm import tqdm
+from collections import defaultdict
 
 import detection
 import classification
@@ -256,9 +257,45 @@ def load_edge_none_object_data(remove_file_list, server_data_path):
     for remove_file in tqdm(remove_file_list):
         shutil.copy2(remove_file, server_data_path)
 
+
+from collections import defaultdict
+
+def count_remove_bbox(gt_data_path, remove_file_list, step='edge'):
+    cls_dic = defaultdict(int)
+    print(f"\n📦 [제외된 바운딩박스 분석 - {step.upper()} 단계]")
+    print("-----------------------------------------------------")
+
+    # 가장 긴 파일명 기준으로 정렬 간격 결정
+    max_filename_len = max(len(os.path.basename(f)) for f in remove_file_list)
+
+    for remove_file in remove_file_list:
+        remove_gt_path = os.path.join(gt_data_path, os.path.basename(remove_file))
+        cls_list = []
+        with open(remove_gt_path, "r") as f:
+            for line in f:
+                parts = line.strip().split()
+                if len(parts) != 5:
+                    continue
+                cls_id = int(parts[0])
+                cls_dic[cls_id] += 1
+                cls_list.append(cls_id)
+
+        removed_str = ", ".join(map(str, cls_list)) if cls_list else "없음 (빈 annotations 파일)"
+        print(f"🗑️  {os.path.basename(remove_file):<{max_filename_len}} → 제거된 클래스: {removed_str}")
+
+    print(f"\n📊 {step.upper()} 모델 추론 결과 - 제외된 전체 정답 Bbox 개수")
+    if cls_dic:
+        for k in sorted(cls_dic.keys()):
+            print(f"🔸 Class {k:<2} → {cls_dic[k]} 개")
+    else:
+        print("⚠️  제거된 BBox 클래스가 없습니다.")
+    print("-----------------------------------------------------\n")
+
 def main():
     # 1️⃣ 설정 로드
-    remove_file_list = []
+    edge_remove_file_list = []
+    server_remove_file_list = []
+
     config = load_config(CONFIG_PATH)
     
     # 경로 검증
@@ -294,7 +331,8 @@ def main():
                 if not os.path.exists(edge_data_path):
                     os.makedirs(edge_data_path, exist_ok=True)
 
-                result = run_edge_model(config)
+                # result = run_edge_model(config)
+                result = True
                 if not result:
                     print("❌ Edge 모델 실행 실패")
                     continue
@@ -308,32 +346,36 @@ def main():
                 num_gt_data = len([f for f in glob.glob(os.path.join(image_folder, "*.jpg"))])
 
                 if os.path.exists(edge_data_path):
-                    file_list, remove_file_list = remove_non_object_bboxes(config, edge_data_path)
-                    if len(remove_file_list) == 0 and len(file_list) == num_gt_data:
+                    file_list, edge_remove_file_list = remove_non_object_bboxes(config, edge_data_path)
+                    if len(edge_remove_file_list) == 0 and len(file_list) == num_gt_data:
                         print("⚠️  Edge 모델 결과 모든 이미지에서 객체가 탐지되어 전체 데이터셋을 처리합니다.")
                         file_list = None
-                    elif len(remove_file_list) == 0 and len(file_list) != num_gt_data:
+                    elif len(edge_remove_file_list) == 0 and len(file_list) != num_gt_data:
                         print(f"⚠️ Edge 모델 결과: {len(file_list)}개, 전체 데이터셋: {num_gt_data}개")
                         print("⚠️ Edge 모델 결과와 전체 입력 데이터의 수가 다릅니다. 전체 데이터셋을 처리합니다.")
                         file_list = None
-                    elif len(remove_file_list) > 0:
-                        if len(remove_file_list) == num_gt_data:
+                    elif len(edge_remove_file_list) > 0:
+                        if len(edge_remove_file_list) == num_gt_data:
                             print("⚠️ Edge 모델 결과, 모든 입력 데이터가 탐지되지 않아 성능 평가를 종료합니다.")
                             sys.exit(1)
                         else:
-                            print("⚠️ Edge 모델 결과 아래 이미지에서 객체가 탐지되지 않아 제외한 나머지 데이터셋을 처리합니다.")
-                            for f in remove_file_list:
-                                print(f)
+                            print(f"⚠️ Edge 모델 결과 아래 이미지에서 객체가 탐지되지 않아 제외한 나머지 데이터셋을 처리합니다.\n 제외 이미지: {len(edge_remove_file_list)} 장")
+                            count_remove_bbox(gt_data_path, edge_remove_file_list)
 
                 else:
                     print("⚠️ Edge 모델 결과가 없어 전체 데이터셋을 처리합니다.")
                     file_list = None
                 
-                success = run_server_model(config, file_list)
+                # success = run_server_model(config, file_list)
+                success = True
+                # server 모델이 미탐한 데이터 보기
+                if success:
+                    server_file_list, server_remove_file_list = remove_non_object_bboxes(config, server_data_path)
+                    count_remove_bbox(gt_data_path, server_remove_file_list, step)
 
-                # edge 모델이 미탐지한 데이터 가져오기
-                if os.path.exists(edge_data_path) and remove_file_list:
-                    load_edge_none_object_data(remove_file_list, server_data_path)
+                    # edge 모델이 미탐지한 데이터 가져오기
+                    if os.path.exists(edge_data_path) and edge_remove_file_list:
+                        load_edge_none_object_data(edge_remove_file_list, server_data_path)
 
                 if not success:
                     print("❌ Server 모델 실행 실패")
@@ -342,13 +384,15 @@ def main():
             elif step == "classification":
                 if not os.path.exists(classification_data_path):
                     os.makedirs(classification_data_path, exist_ok=True)
+
                 result = run_classification_model(config)
+
                 if not result:
                     print("❌ Classification 모델 실행 실패")
                     continue
                 
                 # 이미 읽은 결과를 전달
-                remove_non_pothole_bboxes(config, server_data_path, classification_data_path, classification_results=result, debug_mode=True)
+                remove_non_pothole_bboxes(config, server_data_path, classification_data_path, classification_results=result, debug_mode=False)
 
             # 각 단계마다 evaluation 실행 여부 확인
             if config.get("evaluation_per_step", False):

@@ -50,8 +50,19 @@ class Evaluator:
         classes = sorted(classes)
 
         # 출력용 헤더
-        print(f"{'Class ID':<10} {'AP (%)':>7} {'TP':>5} {'FP':>5} {'Precision (%)':>15} {'Recall (%)':>11}")
-        print("=" * 60)
+        print(
+            f"{'Class ID':<10}"  # Class ID: 왼쪽 정렬 10칸
+            f"{'AP (%)':>11}"  # AP (%):   오른쪽 정렬 11칸
+            f"{'TP':>7}"  # TP:       오른쪽 정렬 7칸
+            f"{'FP':>6}"  # FP:       오른쪽 정렬 6칸
+            f"{'GT':>6}"  # GT:       오른쪽 정렬 6칸
+            f"{'Precision(%)':>17}"  # Precision(%): 오른쪽 정렬 17칸
+            f"{'Recall(%)':>12}"  # Recall(%):    오른쪽 정렬 12칸
+            f"{'Error_Rate(%)':>16}"  # error_rate(%): 오른쪽 정렬 16칸
+            f"{'Accuracy(%)':>13}"  # accuracy(%):   오른쪽 정렬 13칸
+            f"{'F1_score(%)':>13}"  # F1_score(%):   오른쪽 정렬 13칸
+        )
+        print("=" * 120)
 
         # 2) 클래스별 평가
         for c in classes:
@@ -157,10 +168,29 @@ class Evaluator:
                 TP_sum / (TP_sum + FN_sum) if npos > 0 else 0.0
             )
 
+            class_error_rate = (
+                (FP_sum + FN_sum) / (TP_sum + FP_sum + FN_sum) if (TP_sum + FP_sum + FN_sum) > 0 else 0.0
+            )
+            class_accuracy = (
+                TP_sum / (TP_sum + FN_sum) if (TP_sum + FN_sum) > 0 else 0.0
+            )
+
+            class_F1_score = (
+                    (2 * class_recall * class_precision) / (class_recall + class_precision)
+            )
+
             # 출력 및 결과 저장
             print(
-                f"{c:<10} {ap*100:>6.2f}% {int(TP_sum):>5} {int(FP_sum):>5}"
-                f" {class_precision*100:>13.2f}% {class_recall*100:>10.2f}%"
+                f"{c:<10}"  # Class ID
+                f"{ap * 100:>10.2f}%"  # AP (%)
+                f"{int(TP_sum):>7}"  # TP
+                f"{int(FP_sum):>6}"  # FP
+                f"{npos:>6}"  # GT
+                f"{class_precision * 100:>15.2f}%"  # Precision(%)
+                f"{class_recall * 100:>11.2f}%"  # Recall(%)
+                f"{class_error_rate * 100:>15.2f}%"  # error_rate(%)
+                f"{class_accuracy * 100:>11.2f}%"  # accuracy(%)
+                f"{class_F1_score * 100:>11.2f}%"  # F1_score(%)
             )
 
             r = {
@@ -177,7 +207,7 @@ class Evaluator:
             }
             ret.append(r)
 
-        print("=" * 60)
+        print("=" * 120)
         return ret
 
     def PlotPrecisionRecallCurve(

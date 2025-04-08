@@ -23,6 +23,7 @@ def yolo_inference(info, model_type, filelist=None):
     input_path = info["input_path"]
     output_dir = info["output_dir"]
     gpu_num = info["gpu_num"]
+    inference_img = info["inference_img"]
 
     print("\n\n==================================================================================================================")
     print(f"                                         * {AI_APPLICATION_VERION} - {(model_type).upper()} *")
@@ -120,8 +121,9 @@ def yolo_inference(info, model_type, filelist=None):
             img_recv_cnt = 0
             for filename in partial_send_file_list:
                 img_recv_cnt += 1
-                # ssh_manager.get_file(remote_input_dir_images + 'results/' + filename[:-3] + 'jpg',
-                #                     os.path.join(output_images_path, filename[:-3] + 'jpg'))  # download images file
+                if inference_img:
+                    ssh_manager.get_file(remote_input_dir_images + 'results/' + filename[:-3] + 'jpg',
+                                        os.path.join(output_images_path, filename[:-3] + 'jpg'))  # download images file
                 ssh_manager.get_file(remote_input_dir_annotations + filename[:-3] + 'txt',
                                     os.path.join(output_annotations_path, filename[:-3] + 'txt'))  # download annotations file
 
@@ -170,8 +172,9 @@ def yolo_inference(info, model_type, filelist=None):
         img_recv_cnt = 0
         for filename in partial_send_file_list:
             img_recv_cnt += 1
-            # ssh_manager.get_file(remote_input_dir_images + 'results/' + filename[:-3] + 'jpg',
-            #                     os.path.join(output_images_path,filename[:-3] + 'jpg'))  # download images file
+            if inference_img:
+                ssh_manager.get_file(remote_input_dir_images + 'results/' + filename[:-3] + 'jpg',
+                                    os.path.join(output_images_path,filename[:-3] + 'jpg'))  # download images file
             ssh_manager.get_file(remote_input_dir_annotations + filename[:-3] + 'txt',
                                 os.path.join(output_annotations_path, filename[:-3] + 'txt'))  # download annotations file
 
