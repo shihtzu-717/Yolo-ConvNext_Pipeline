@@ -58,11 +58,10 @@ class Evaluator:
             f"{'GT':>6}"  # GT:       오른쪽 정렬 6칸
             f"{'Precision(%)':>17}"  # Precision(%): 오른쪽 정렬 17칸
             f"{'Recall(%)':>12}"  # Recall(%):    오른쪽 정렬 12칸
-            f"{'Error_Rate(%)':>16}"  # error_rate(%): 오른쪽 정렬 16칸
-            f"{'Accuracy(%)':>13}"  # accuracy(%):   오른쪽 정렬 13칸
+            f"{'FDR(%)':>12}"  # error_rate(%): 오른쪽 정렬 16칸
             f"{'F1_score(%)':>13}"  # F1_score(%):   오른쪽 정렬 13칸
         )
-        print("=" * 120)
+        print("=" * 130)
 
         # 2) 클래스별 평가
         for c in classes:
@@ -168,8 +167,11 @@ class Evaluator:
                 TP_sum / (TP_sum + FN_sum) if npos > 0 else 0.0
             )
 
-            class_error_rate = (
+            class_error_rate_FN = (
                 (FP_sum + FN_sum) / (TP_sum + FP_sum + FN_sum) if (TP_sum + FP_sum + FN_sum) > 0 else 0.0
+            )
+            class_FDR = (
+                (FP_sum) / (TP_sum + FP_sum) if (TP_sum + FP_sum + FN_sum) > 0 else 0.0
             )
             class_accuracy = (
                 TP_sum / (TP_sum + FN_sum) if (TP_sum + FN_sum) > 0 else 0.0
@@ -181,15 +183,14 @@ class Evaluator:
 
             # 출력 및 결과 저장
             print(
-                f"{c:<10}"  # Class ID
+                f"{c:<10} "  # Class ID
                 f"{ap * 100:>10.2f}%"  # AP (%)
                 f"{int(TP_sum):>7}"  # TP
                 f"{int(FP_sum):>6}"  # FP
                 f"{npos:>6}"  # GT
                 f"{class_precision * 100:>15.2f}%"  # Precision(%)
                 f"{class_recall * 100:>11.2f}%"  # Recall(%)
-                f"{class_error_rate * 100:>15.2f}%"  # error_rate(%)
-                f"{class_accuracy * 100:>11.2f}%"  # accuracy(%)
+                f"{class_FDR * 100:>11.2f}%"  # error_rate(%)
                 f"{class_F1_score * 100:>11.2f}%"  # F1_score(%)
             )
 
@@ -207,7 +208,7 @@ class Evaluator:
             }
             ret.append(r)
 
-        print("=" * 120)
+        print("=" * 130)
         return ret
 
     def PlotPrecisionRecallCurve(
